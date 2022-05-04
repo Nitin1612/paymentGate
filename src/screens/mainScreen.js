@@ -1,7 +1,13 @@
-import { View, Text, Button, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native'
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import RazorpayCheckout from 'react-native-razorpay';
-import { RadioButton, ToggleButton } from 'react-native-paper';
+import { RadioButton } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
+import { ScrollView } from 'react-native-gesture-handler';
+import { Button, Snackbar } from 'react-native-paper';
+
+
 
 
 
@@ -11,30 +17,50 @@ const MainScreen = () => {
     const [remarks, setRemarks] = useState('');
     const [checked, setChecked] = useState('first');
     const [value, setValue] = useState('first');
+    const [status,setStatus] = useState('');
+    const [error,setError] = useState('');
+    const navigation = useNavigation();
+    const [visible, setVisible] = React.useState(false);
+
+    const onToggleSnackBar = () => setVisible(!visible);
+  
+    const onDismissSnackBar = () => setVisible(false);
+
 
     const makePayment = () => {
         var options = {
             description: remarks,
             image: 'https://media-exp1.licdn.com/dms/image/C560BAQHggYLcXxs78w/company-logo_200_200/0/1592541089153?e=2147483647&v=beta&t=X8Q-unT-Ms6xfn4lzcPkhSNED6sXrfLugtURJi8l_Vg',
             currency: 'INR',
-            key: 'rzp_test_IOVqmwpsB9ZetB', // Your api key
+            key: 'rzp_test_IOVqmwpsB9ZetB',
             amount: parseInt(amount),
             name: name,
             theme: { color: '#528FF0' }
         }
+        
         RazorpayCheckout.open(options).then((data) => {
-            // handle success
-            alert(`Success: ${data.razorpay_payment_id}`);
-            <Text style={{ color: "#212121" }}>{data.razorpay_payment_id}</Text>
+            
+            alert(`Successfull payment :)`);
+            console.log(data.razorpay_payment_id,'payment success')
+            setStatus(data.razorpay_payment_id)
+            navigation.navigate("StatementScreen",{
+                data:data,
+                name:name,
+                amount:amount
+            })
+
         }).catch((error) => {
-            // handle failure
-            alert(`Error: ${error.code} | ${error.description}`);
+            alert(`Payment Unsuccessfull:(`);
+            console.log(error.description,'error')
+            
         });
     }
-
+console.log(status,"status");
+console.log(error,"error");
 
 
     return (
+        <ScrollView>
         <View style={styles.container}>
             <View style={{ flexDirection: 'row', marginTop: 10, marginBottom: 10 }}>
                 <Image
@@ -44,20 +70,21 @@ const MainScreen = () => {
                     }}
                 />
                 <Text style={styles.title}> Send Money </Text>
-
+                <Icon name='remove' size={30}  style={{marginTop:10,left:150}} onPress={()=>{navigation.goBack()}}/>
             </View>
-
-
+            
             <View style={styles.column}>
                 <View style={[styles.btn1, { backgroundColor: "#f5f5f5" }]}>
                     <Text style={styles.profile}>Payee Name</Text>
                     <TextInput
-                        style={{ marginTop: 30, marginLeft: -90, height: 50, fontSize: 28 }}
+                        style={{ marginTop: 30, marginLeft: -90, height: 50, fontSize: 18 }}
                         placeholder="Enter the name!"
                         onChangeText={newName => setName((newName))}
                         defaultValue={name}
+                        
                     />
                 </View>
+                
 
 
                 <View style={[styles.btn1, { backgroundColor: "#f5f5f5" }]}>
@@ -70,7 +97,7 @@ const MainScreen = () => {
                             }}
                         />
                         <TextInput
-                            style={{ marginTop: 25, marginLeft: 0, height: 50, width: 300, fontSize: 28 }}
+                            style={{ marginTop: 25, marginLeft: 0, height: 50, width: 300, fontSize: 18 }}
                             placeholder="Amount to be paid!"
                             onChangeText={newAmount => setAmount((newAmount))}
                             defaultValue={amount}
@@ -102,7 +129,7 @@ const MainScreen = () => {
                 <View style={[styles.btn3, { backgroundColor: "#f5f5f5" }]}>
                     <Text style={styles.profile}>Remarks</Text>
                     <TextInput
-                        style={{ marginTop: 40, marginLeft: -65, height: 50, fontSize: 28 }}
+                        style={{ marginTop: 40, marginLeft: -65, height: 50, fontSize: 18 }}
                         placeholder="Type Remarks!"
                         onChangeText={newRemarks => setRemarks((newRemarks))}
                         defaultValue={remarks}
@@ -161,6 +188,7 @@ const MainScreen = () => {
 
 
         </View>
+        </ScrollView>
     )
 }
 
@@ -168,7 +196,7 @@ const MainScreen = () => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#d3d3d3',
+        backgroundColor: '#fff',
     },
     profile: {
         color: '#2f4f4f',
@@ -225,7 +253,7 @@ const styles = StyleSheet.create({
     title: {
         marginTop: 10,
         color: '#2f4f4f',
-        fontSize: 32,
+        fontSize: 22,
         fontWeight: 'bold',
     },
     tinyLogo: {
